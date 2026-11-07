@@ -8,18 +8,17 @@ export function createRepositories(db) {
       /**
        * Creates a new generated batch record.
        */
-      createBatch({ id, userId, requested, selectedTypes }) {
+      createBatch({ id, userId, requested, selectedTypes, createdAt = Date.now() }) {
         const stmt = db.prepare(`
           INSERT INTO generated_batches (
             id, user_id, created_at, requested, received, selected_types_json, status, errors_json
           ) VALUES (?, ?, ?, ?, 0, ?, 'in_progress', NULL)
         `);
-        const now = Date.now();
-        stmt.run(id, userId, now, requested, JSON.stringify(selectedTypes));
+        stmt.run(id, userId, createdAt, requested, JSON.stringify(selectedTypes));
         return {
           id,
           userId,
-          createdAt: now,
+          createdAt,
           requested,
           received: 0,
           selectedTypes,
@@ -57,7 +56,7 @@ export function createRepositories(db) {
             SELECT id, user_id, created_at, requested, received, selected_types_json, status, errors_json
             FROM generated_batches
             WHERE user_id = ?
-            ORDER BY created_at DESC
+            ORDER BY created_at DESC, rowid DESC
             LIMIT 1
           `
           )

@@ -55,7 +55,8 @@ describe("/start Handler & Menu (T05)", () => {
       },
       command(cmd, handler) {
         registeredHandlers.set(cmd, handler);
-      }
+      },
+      on() {}
     };
 
     createBot({
@@ -99,7 +100,8 @@ describe("/start Handler & Menu (T05)", () => {
       },
       command(cmd, handler) {
         registeredHandlers.set(cmd, handler);
-      }
+      },
+      on() {}
     };
 
     createBot({

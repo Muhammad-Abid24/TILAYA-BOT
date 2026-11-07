@@ -63,3 +63,42 @@ export function getStartKeyboard() {
   };
 }
 
+/**
+ * Formats the email generation result for Telegram message.
+ *
+ * @param {object} params
+ * @param {number} params.requested
+ * @param {number} params.received
+ * @param {Array<{ email: string }>} params.addresses
+ * @param {'completed' | 'partial' | 'failed'} params.status
+ * @returns {string}
+ */
+export function formatGenerationResult({ requested, received, addresses, status }) {
+  if (status === "failed" || received === 0) {
+    return (
+      `❌ <b>Gagal Membuat Email</b>\n\n` +
+      `Tidak dapat memperoleh alamat email dari upstream API setelah 5 percobaan.\n` +
+      `Silakan coba beberapa saat lagi dengan <code>/get</code>.`
+    );
+  }
+
+  const isPartial = status === "partial";
+  const title = isPartial
+    ? `⚠️ <b>Hasil Parsial (${received}/${requested} Email)</b>`
+    : `✅ <b>Berhasil Membuat ${received} Email</b>`;
+
+  const listItems = addresses
+    .slice(0, 50)
+    .map((item, idx) => `${idx + 1}. <code>${item.email}</code>`)
+    .join("\n");
+
+  const footer =
+    `\n\n💡 <b>Perintah selanjutnya:</b>\n` +
+    `• <code>/inbox &lt;email&gt;</code> — Baca pesan masuk\n` +
+    `• <code>/export</code> — Unduh berkas .txt hasil ini\n` +
+    `• <code>/extend</code> — Perpanjang masa aktif email`;
+
+  return `${title}\n\n${listItems}${footer}`;
+}
+
+
