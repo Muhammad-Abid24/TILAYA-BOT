@@ -5,6 +5,9 @@ import { registerGetHandler } from "./handlers/get.js";
 import { registerBulkHandler, handleSelectCountText } from "./handlers/bulk.js";
 import { registerExportHandler, handleExportAction } from "./handlers/export.js";
 import { registerInboxHandler, handleInboxCallback } from "./handlers/inbox.js";
+import { registerExtendHandler, handleExtendCallback } from "./handlers/extend.js";
+import { registerDoneHandler, handleDoneCallback, initiateDoneConfirmation } from "./handlers/done.js";
+import { registerStopHandler } from "./handlers/stop.js";
 import { handleWizardCallback, startEmailTypeWizard } from "./wizard/emailTypeWizard.js";
 import { formatGenerationResult } from "../utils/formatting.js";
 import { OperationCancelledError } from "../utils/errors.js";
@@ -99,6 +102,32 @@ export function createBot(options) {
       );
     }
 
+    if (data === "cmd:extend") {
+      await ctx.answerCbQuery();
+      return ctx.reply(
+        "⏳ <b>Perpanjang Masa Aktif Email</b>\n\n" +
+        "Gunakan perintah: <code>/extend</code> untuk memilih dari riwayat, atau <code>/extend &lt;alamat_email&gt;</code>.",
+        { parse_mode: "HTML" }
+      );
+    }
+
+    if (data === "cmd:done") {
+      await ctx.answerCbQuery();
+      return initiateDoneConfirmation(ctx);
+    }
+
+    // Done confirmation callback handling
+    if (data.startsWith("done:")) {
+      const handled = await handleDoneCallback(ctx);
+      if (handled) return;
+    }
+
+    // Extend callback handling
+    if (data.startsWith("ext:")) {
+      const handled = await handleExtendCallback(ctx);
+      if (handled) return;
+    }
+
     // Inbox callback handling
     if (data.startsWith("inbox:")) {
       const handled = await handleInboxCallback(ctx);
@@ -191,6 +220,9 @@ export function createBot(options) {
   registerBulkHandler(bot);
   registerExportHandler(bot);
   registerInboxHandler(bot);
+  registerExtendHandler(bot);
+  registerDoneHandler(bot);
+  registerStopHandler(bot);
 
   return bot;
 }

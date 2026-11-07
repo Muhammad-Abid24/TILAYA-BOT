@@ -104,13 +104,7 @@ export function createEmailService({
 
         // Delay between attempts if we still need more and attempts remain
         if (uniqueEmailsMap.size < validatedCount && attempts < MAX_ATTEMPTS) {
-          try {
-            await abortableDelay(bulkDelayMs, signal);
-          } catch {
-            if (signal?.aborted) {
-              throw new OperationCancelledError("Email generation cancelled");
-            }
-          }
+          await abortableDelay(bulkDelayMs, signal);
         }
       }
 

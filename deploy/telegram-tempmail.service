@@ -1,0 +1,48 @@
+[Unit]
+Description=TILAYA - Telegram TempMail Private Bot Service
+After=network.target network-online.target
+Wants=network-online.target
+Documentation=https://github.com/example/Tilaya-Bot
+
+[Service]
+Type=simple
+
+# Run as dedicated unprivileged system user
+User=tilaya
+Group=tilaya
+
+# Application directory and environment
+WorkingDirectory=/opt/tilaya-bot
+EnvironmentFile=/etc/tilaya-bot/.env
+
+# Execute using Node.js 22 LTS
+ExecStart=/usr/bin/node /opt/tilaya-bot/src/index.js
+
+# Restart policy on failure with 5 seconds backoff
+Restart=on-failure
+RestartSec=5s
+
+# Dedicated private state directory: /var/lib/tilaya-bot
+StateDirectory=tilaya-bot
+StateDirectoryMode=0700
+ReadWritePaths=/var/lib/tilaya-bot
+
+# Linux Security Hardening & Isolation
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+
+# Resource limits
+LimitNOFILE=65536
+
+# Timeout for graceful SIGTERM termination before SIGKILL
+TimeoutStopSec=15s
+
+[Install]
+WantedBy=multi-user.target
+
