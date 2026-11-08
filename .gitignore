@@ -155,3 +155,13 @@ temp/
 
 # Deployment files
 /deploy/
+
+# SQLite databases & runtime data
+/data/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+

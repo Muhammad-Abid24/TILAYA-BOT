@@ -5,10 +5,10 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "dev": "node --watch src/index.js",
-    "start": "node src/index.js",
-    "build": "node --check src/index.js",
-    "test": "node --test 'tests/**/*.test.js'",
+    "dev": "PATH=\"/usr/local/bin:$PATH\" node --watch src/index.js",
+    "start": "PATH=\"/usr/local/bin:$PATH\" node src/index.js",
+    "build": "PATH=\"/usr/local/bin:$PATH\" node --check src/index.js",
+    "test": "PATH=\"/usr/local/bin:$PATH\" node --test 'tests/**/*.test.js'",
     "lint": "eslint ."
   },
   "engines": {
