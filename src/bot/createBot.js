@@ -224,5 +224,22 @@ export function createBot(options) {
   registerDoneHandler(bot);
   registerStopHandler(bot);
 
+  // 5. Global error handling to prevent unhandled rejections from terminating the polling loop
+  if (typeof bot.catch === "function") {
+    bot.catch((err, ctx) => {
+      const errMsg = err?.message || err?.description || String(err);
+      if (
+        errMsg.includes("query is too old") ||
+        errMsg.includes("query ID is invalid") ||
+        errMsg.includes("response timeout expired")
+      ) {
+        return;
+      }
+      console.error(
+        `[TILAYA] Bot error on update ${ctx?.update?.update_id || "unknown"}: ${errMsg}`
+      );
+    });
+  }
+
   return bot;
 }

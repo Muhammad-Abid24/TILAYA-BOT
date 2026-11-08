@@ -17,6 +17,26 @@ export function createAuthMiddleware({ allowedIds }) {
   const allowedSet = allowedIds instanceof Set ? allowedIds : new Set(allowedIds);
 
   return async function authMiddleware(ctx, next) {
+    // Intercept answerCbQuery to gracefully ignore expired callback query errors
+    if (ctx.callbackQuery && typeof ctx.answerCbQuery === "function") {
+      const originalAnswerCbQuery = ctx.answerCbQuery.bind(ctx);
+      ctx.answerCbQuery = async (...args) => {
+        try {
+          return await originalAnswerCbQuery(...args);
+        } catch (err) {
+          const msg = err?.message || err?.description || "";
+          if (
+            msg.includes("query is too old") ||
+            msg.includes("query ID is invalid") ||
+            msg.includes("response timeout expired")
+          ) {
+            return false;
+          }
+          throw err;
+        }
+      };
+    }
+
     const userId = ctx.from?.id;
     const chatType = ctx.chat?.type;
 

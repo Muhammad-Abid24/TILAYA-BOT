@@ -105,6 +105,45 @@ describe("Authorization and Callback Security Middleware (T02)", () => {
       assert.ok(ctx.getAnsweredCbQuery()?.text?.includes("chat privat"));
       assert.equal(ctx.getAnsweredCbQuery()?.options?.show_alert, true);
     });
+
+    it("should safely ignore 'query is too old' error when answering callback query", async () => {
+      const { ctx, next } = createMockCtx({
+        userId: 1001,
+        chatType: "private",
+        isCallback: true,
+        callbackData: "cmd:inbox"
+      });
+      // Mock answerCbQuery throwing query is too old error
+      ctx.answerCbQuery = async () => {
+        throw new Error("400: Bad Request: query is too old and response timeout expired or query ID is invalid");
+      };
+
+      await authMiddleware(ctx, next);
+      assert.equal(ctx.getNextCalled(), true);
+
+      // Calling ctx.answerCbQuery directly should return false without throwing
+      const result = await ctx.answerCbQuery();
+      assert.equal(result, false);
+    });
+
+    it("should rethrow other errors when answering callback query", async () => {
+      const { ctx, next } = createMockCtx({
+        userId: 1001,
+        chatType: "private",
+        isCallback: true,
+        callbackData: "cmd:inbox"
+      });
+      ctx.answerCbQuery = async () => {
+        throw new Error("500: Internal Server Error");
+      };
+
+      await authMiddleware(ctx, next);
+      assert.equal(ctx.getNextCalled(), true);
+
+      await assert.rejects(async () => {
+        await ctx.answerCbQuery();
+      }, /500: Internal Server Error/);
+    });
   });
 
   describe("createCallbackGuardMiddleware", () => {

@@ -89,7 +89,9 @@ export async function bootstrap() {
   console.log(`[TILAYA] Authorized users: ${config.ALLOWED_TELEGRAM_IDS.size} ID(s)`);
   console.log(`[TILAYA] Upstream base URL: ${config.TEMPMAIL_BASE_URL}`);
 
-  await bot.launch();
+  await bot.launch({
+    dropPendingUpdates: true
+  });
   console.log("[TILAYA] Bot is running and listening for Telegram updates.");
 
   return { bot, db };
